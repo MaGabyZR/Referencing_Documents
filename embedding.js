@@ -14,16 +14,17 @@ const Author = mongoose.model('Author', authorSchema);
 
 const Course = mongoose.model('Course', new mongoose.Schema({
   name: String,
-  author: {                                           //embed the author document directly inside of the course document. It is an embedded or subdocument.
+  authors: [authorSchema]                                 //To work with an array of Subdocuments.
+  /* author: {                                           //embed the author document directly inside of the course document. It is an embedded or subdocument.
     type: authorSchema,
     required: true
-  }      
+  }       */
 }));
 
-async function createCourse(name, author) {
+async function createCourse(name, authors) {             //rename author to authors to work with the array of Subdocuments.
   const course = new Course({
     name, 
-    author
+    authors
   }); 
   
   const result = await course.save();
@@ -44,5 +45,29 @@ async function updateAuthor(courseId){
 // But .update() is no longer supported in Mongoose. 
 // It was deprecated in favor of .updateOne(), .updateMany(), or .findOneAndUpdate(). 
 
+//Add and Author to the array[]
+async function addAuthor(courseId, author){
+  const course = await Course.findById(courseId);
+  course.authors.push(author);
+  course.save();
+}
+
+//to remove an Author. In newer versions of Mongoose, .remove() was deprecated
+//Use .deleteOne() or .pull() instead of .remove()
+async function removeAuthor(courseId, authorId) {
+  const course = await Course.findById(courseId);
+  const author = course.authors.id(authorId);
+  author.deleteOne();
+  course.save();
+}
+
+removeAuthor('67bf4b1654b42a5081b79b76', '67bf4ca5bb8f610bdb51bc81');
+//addAuthor('67bf4b1654b42a5081b79b76', new Author({ name: 'Panzi' }));
+
+/* createCourse('Node Course', [             //To work with an array of Subdocuments. 
+  new Author({ name: 'MaGaby' }),
+  new Author({ name: 'Monti' })
+]); */
+
 //createCourse('Node Course', new Author({ name: 'MaGaby' })); 
-updateAuthor('67bf3ea691e4beef3db00510');
+//updateAuthor('67bf3ea691e4beef3db00510');
