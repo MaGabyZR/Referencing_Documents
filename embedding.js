@@ -13,7 +13,11 @@ const authorSchema = new mongoose.Schema({
 const Author = mongoose.model('Author', authorSchema);
 
 const Course = mongoose.model('Course', new mongoose.Schema({
-  name: String
+  name: String,
+  author: {                                           //embed the author document directly inside of the course document. It is an embedded or subdocument.
+    type: authorSchema,
+    required: true
+  }      
 }));
 
 async function createCourse(name, author) {
@@ -31,4 +35,14 @@ async function listCourses() {
   console.log(courses);
 }
 
-createCourse('Node Course', new Author({ name: 'Mosh' }));
+async function updateAuthor(courseId){
+  const course = await Course.findById(courseId);                
+  course.author.name = 'MaGaby Rubio';
+  course.save();
+}
+//You can update it directly and save it. 
+// But .update() is no longer supported in Mongoose. 
+// It was deprecated in favor of .updateOne(), .updateMany(), or .findOneAndUpdate(). 
+
+//createCourse('Node Course', new Author({ name: 'MaGaby' })); 
+updateAuthor('67bf3ea691e4beef3db00510');
